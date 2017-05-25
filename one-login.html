@@ -34,11 +34,41 @@
         offlinelogin: {type: Object, value: {}},
         //history on-off, handle push notifications
     },
-    login: function () {
+    signIn: function () {
         this.$.auth.signInWithPopup()
-        .then(function(response) {// successful authentication response here})
-        .catch(function(error) {// unsuccessful authentication response here});
+        .then(function(response) { })
+        .catch(function(error) { });
+        // 'facebook'
+        // 'github'
+        // 'google'
+        // 'twitter'
+        // createUserWithEmailAndPassword(email: !String, password: !String): Promise
+        // Creates a new user account using an email / password combination.
+
+        // signInAnonymously(): Promise
+        // Authenticates a Firebase client using a new, temporary guest account.
+
+        // signInWithCredential(credential): Promise
+        // Authenticates a Firebase client using an oauth id_token.
+
+        // signInWithCustomToken(token): Promise
+        // Authenticates a Firebase client using a custom JSON Web Token.
+
+        // signInWithEmailAndPassword(email: !String, password: !String): Promise
+        // Authenticates a Firebase client using an email / password combination.
+
+        // signInWithPopup(provider: ?String): Promise
+        // Authenticates a Firebase client using a popup-based OAuth flow.
+
+        // signInWithRedirect(provider: ?String): Promise
+        // Authenticates a firebase client using a redirect-based OAuth flow.
+
+        // signOut(): Promise
+        // Unauthenticates a Firebase client.
     },
+    signOut: function () {
+        signOut();
+    }
 
   });
 </script>
