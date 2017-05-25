@@ -1,0 +1,32 @@
+<!-- Execute polymer serve on the file's folder and open http://localhost:8080/components/one-chat/test.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="import"  href="one-login.html">
+
+<style is="custom-style">
+    :root {
+    --one-shadow-color: green;
+    --one-shadow-blur: blur(20px);
+    }
+</style>
+</head>
+<body>
+    <dom-bind id="app">
+  <template>
+        <span>Open modal</span>
+        <input type="checkbox" checked="{{hostChecked::change}}">
+        <one-modal open="{{hostChecked}}" icon="menu" title="Test Title">
+            say hi to me
+            <span slot="footer">Mr. Darcy</span>
+        </one-modal> 
+  </template>
+</dom-bind>
+
+</body>
+</html>
+
+
+
+

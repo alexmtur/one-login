@@ -1,0 +1,45 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../one-modal/one-modal.html">
+<!-- <link rel="import" href="../polymerfire/firebase-app.html"> -->
+<link rel="import" href="../polymerfire/firebase-auth-script.html">
+<!-- <link rel="import" href="../polymerfire/firebase-database-script.html">
+<link rel="import" href="../polymerfire/firebase-storage-script.html">
+<link rel="import" href="../polymerfire/firebase-messaging-script.html"> -->
+<dom-module id="one-login">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+        </firebase-auth>
+    </template>
+
+  <script>
+  Polymer({
+    is: "one-login",
+    properties: {
+        uid: String,
+        data: {
+            type: Object,
+            observer: 'dataChanged'
+        },
+        loginId: String,
+        user: Object,
+        myUserId: String,
+        profilePath: String,
+        profile: Object,
+        text: String,
+        offlinelogin: {type: Object, value: {}},
+        //history on-off, handle push notifications
+    },
+    login: function () {
+        this.$.auth.signInWithPopup()
+        .then(function(response) {// successful authentication response here})
+        .catch(function(error) {// unsuccessful authentication response here});
+    },
+
+  });
+</script>
+</dom-module>
