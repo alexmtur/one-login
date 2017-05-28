@@ -13,13 +13,18 @@
 </style>
 </head>
 <body>
+    <firebase-app
+      auth-domain="one-chat-b27b9.firebaseapp.com"
+      database-url="https://one-chat-b27b9.firebaseio.com"
+      api-key="AIzaSyADZ5GzJfFmSNylglLESQH9lK2USQSxQy8"
+      storage-bucket="one-chat-b27b9.appspot.com"
+      messaging-sender-id="973343717113">
+    </firebase-app>
     <dom-bind id="app">
   <template>
         <span>Open modal</span>
         <input type="checkbox" checked="{{hostChecked::change}}">
-        <one-modal open="{{hostChecked}}" icon="menu" title="Test Title">
-            say hi to me
-            <span slot="footer">Mr. Darcy</span>
+        <one-login>
         </one-modal> 
   </template>
 </dom-bind>

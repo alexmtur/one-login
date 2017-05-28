@@ -5,6 +5,7 @@
 <!-- <link rel="import" href="../polymerfire/firebase-database-script.html">
 <link rel="import" href="../polymerfire/firebase-storage-script.html">
 <link rel="import" href="../polymerfire/firebase-messaging-script.html"> -->
+
 <dom-module id="one-login">
     <template>
         <style>
@@ -14,7 +15,13 @@
         </style>
         <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
         </firebase-auth>
+        <one-modal open="{{open}}">
+        hey there babe
+        <one-modal>
+        
     </template>
+
+    Open if the user is not logged in!!
 
   <script>
   Polymer({
@@ -24,6 +31,13 @@
         data: {
             type: Object,
             observer: 'dataChanged'
+        },
+        open: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+            notify: true,
+            observer: '_openChanged'
         },
         loginId: String,
         user: Object,
@@ -73,3 +87,15 @@
   });
 </script>
 </dom-module>
+
+<iron-iconset-svg name="my-svg-icons" size="24">
+  <svg>
+    <defs>
+      <g id="shape">
+        <rect x="12" y="0" width="12" height="24" />
+        <circle cx="12" cy="12" r="12" />
+      </g>
+    </defs>
+  </svg>
+</iron-iconset-svg>
+
