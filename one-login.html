@@ -133,10 +133,11 @@
                             <label>Passwords don't match</label>
                         </div>
                         <!-- All these labels have to be stored as strings for internationalization in future releases. -->
+                        <div id="send-password" on-tap="sendPassword">Forgot your password?</div>
                     </form>
                     <button on-tap="signIn">login</button>
                 </div>
-                <div id="send-password" on-tap="sendPassword">Forgot your password?</div>
+                
                 <div id="footer">
                     <slot name="footer">
                         <!-- Forgot your password handler can be introduced here -->
@@ -175,6 +176,8 @@
         loginId: String,
         user: {
             type: Object,
+            reflectToAttribute: true,
+            notify: true,
             // observer: '_userChanged'
         },
         signedIn: {
