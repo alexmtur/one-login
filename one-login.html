@@ -1,12 +1,11 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../one-class/one-class.html">
 <link rel="import" href="../one-modal/one-modal.html">
+<link rel="import" href="../one-block/one-block.html">
 <link rel="import" href="../polymerfire/firebase-app.html">
 <link rel="import" href="../polymerfire/firebase-auth.html">
-<!-- <link rel="import" href="../polymerfire/firebase-database-script.html">
-<link rel="import" href="../polymerfire/firebase-storage-script.html">
-<link rel="import" href="../polymerfire/firebase-messaging-script.html"> -->
 
-<!-- TODO: Profile. Handle email login better. Add variables to auto-open or not. -->
+<!-- TODO: Profile. Handle email login better. Add variables to auto-visible or not. -->
 
 <dom-module id="one-login">
     <template>
@@ -62,12 +61,12 @@
             input:valid + label:after {
                 content: 'valid';
                 color: #0c0;
-              }
+            }
 
-              input:invalid + label:after {
+            input:invalid + label:after {
                 content: 'invalid';
                 color: #c00;
-              }
+            }
             #email-login {
                 width: 100%;
                 display: flex;
@@ -104,7 +103,7 @@
         <firebase-auth id="auth" user="{{user}}" provider="{{selectedProvider}}" on-error="handleError" signed-in="{{signedIn}}"></firebase-auth>
 
         <!-- Modal -->
-        <one-modal open="{{open}}" size="xl" no-header no-footer no-close-icon no-backdrop>
+        <one-modal visible="{{visible}}" size="xl" no-header no-footer no-close-icon no-backdrop entry-animation="fade-in" exit-animation="fade-out">
             <!-- <template is="dom-if" if="{{!signedIn}}"> -->
             <div hidden$="{{signedIn}}">
                 <div id="header">
@@ -114,7 +113,7 @@
                 </div>           
                 <div id="login-providers">
                     <template is="dom-repeat" items="{{providerList}}">
-                        <iron-icon icon="one-iconset:{{item}}-login" on-tap="selectProvider" selected$="{{isSelected(item, selectedProvider)}}" class="login-icon"></iron-icon>
+                        <iron-icon icon="one-iconset:{{item}}-login" on-click="selectProvider" selected$="{{isSelected(item, selectedProvider)}}" class="login-icon"></iron-icon>
                     </template>
                 </div>
                 <div id="login-data">
@@ -122,6 +121,7 @@
                     <!-- <div id="annonymous-login">
                         * Keep in mind that annonymous login
                     </div> -->
+                    <one-block visible="{{emailLoginVisible}}" entry-animation="vertical-expand" exit-animation="vertical-shrink">
                     <form id="email-login">
 
                         <input id="email-input" type="email" placeholder="email" value="{{email::input}}" required>
@@ -133,9 +133,10 @@
                             <label>Passwords don't match</label>
                         </div>
                         <!-- All these labels have to be stored as strings for internationalization in future releases. -->
-                        <div id="send-password" on-tap="sendPassword">Forgot your password?</div>
+                        <div id="send-password" on-click="sendPassword">Forgot your password?</div>
                     </form>
-                    <button on-tap="signIn">login</button>
+                    </one-block>
+                    <button on-click="signIn">login</button>
                 </div>
                 
                 <div id="footer">
@@ -150,176 +151,169 @@
                     <slot name="profile">
                         <!-- Create one-profile -->
                     </slot>
-                    <button on-tap="signOut">Logout</button>
+                    <button on-click="signOut">Logout</button>
                 </div>
             </template>
-            <!-- <button on-tap="close">Close</button> -->
+            <!-- <button on-click="close">Close</button> -->
         </one-modal>
     </template>
 
-  <script>
-  Polymer({
-    is: "one-login",
-    properties: {
-        uid: String,
-        data: {
-            type: Object,
-            observer: 'dataChanged'
-        },
-        open: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true,
-            notify: true,
-            // observer: '_openChanged'
-        },
-        loginId: String,
-        user: {
-            type: Object,
-            reflectToAttribute: true,
-            notify: true,
-            // observer: '_userChanged'
-        },
-        signedIn: {
-            type: Boolean,
-            value: false,
-            observer: '_signedInChanged',
-        },
-        myUserId: String,
-        profilePath: String,
-        profile: Object,
-        text: String,
-        offlinelogin: {type: Object, value: {}},
-        providerList: Array,
-        selectedProvider: {
-            type: Number,
-            // value: 0,
-            observer: '_selectedProviderChanged',
-        },
-        passwordPattern: {
-            type: String,
-            value: ".{6,}"
-        },
-        // newAccount: Boolean,
-    },
-    ready: function() {
-        // this.selectedIndex = 0;
-        this.selectedProvider = this.providerList[0];
-        if(this.selectedProvider !== 'email') this.$$('#email-login').style.display = "none";
-        this.animationKeyframes = [
-            {transform: 'scale(0)', maxHeight: "0"},
-            {transform: 'scale(1)', maxHeight: "100px"}
-        ];
-    },
-    checkForm: function() {
-        console.log(this.$['password-input'].validity)
-        return this.$['email-input'].validity && this.$['password-input'].validity;
-
-    },
-    signIn: function () {
-        if(this.selectedProvider === 'annonymous') {
-            this.$.auth.signInAnonymously()
-            .then((response) => {
-                console.log(response);
-                this.open = false;
-            })
-            .catch((error) => {console.log(error)});
-        }
-        else if (this.selectedProvider === 'email') {
-            if(!this.$['email-input'].checkValidity()) return;
-            this.$.auth.app.auth().fetchProvidersForEmail(this.email)
-            .then((response) => {
-                console.log(response)
-                if(!response || !response.length){
-                    this.newAccount = true;
-                    console.log(this.newAccount)
-                    return;
-                }
-                else if(this.response.includes('password')) {
-                    this.newAccount = false;
-                    if(!this.$['password-input'].checkValidity()) return;
-                    this.$.auth.signInWithEmailAndPassword(this.email, this.password)
+    <script>
+        class OneLogin extends OneClass {
+            static get is() { return "one-login"; }
+            static get properties() {
+                return {
+                    uid: {type: String},
+                    // data: {
+                    //     type: Object,
+                    //     observer: '_dataChanged'
+                    // },
+                    visible: {
+                        value: false
+                    },
+                    // loginId: String,
+                    user: {
+                        type: Object,
+                        reflectToAttribute: true,
+                        notify: true,
+                        // observer: '_userChanged'
+                    },
+                    signedIn: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_signedInChanged',
+                    },
+                    myUserId: {type: String},
+                    // profilePath: {type: String},
+                    // profile: {type: String},
+                    // text: {type: String},
+                    // offlinelogin: {type: Object, value: {}},
+                    providerList: {type: Object},
+                    selectedProvider: {
+                        type: Number,
+                        // value: 0,
+                        observer: '_selectedProviderChanged',
+                    },
+                    passwordPattern: {
+                        type: String,
+                        value: ".{6,}"
+                    },
+                    // newAccount: Boolean,
+                };
+            }
+            ready() {
+                super.ready();
+                // this.selectedIndex = 0;
+                this.selectedProvider = this.providerList[0];
+                //Change this for a variable 
+                if(this.selectedProvider !== 'email') this.emailLoginVisible = false;
+            }
+            checkForm() {
+                console.log(this.$['password-input'].validity)
+                return this.$['email-input'].validity && this.$['password-input'].validity;
+            }
+            signIn() {
+                if(this.selectedProvider === 'annonymous') {
+                    this.$.auth.signInAnonymously()
                     .then((response) => {
                         console.log(response);
-                        this.open = false;
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        //display: user and password don't match
-                    });
-                }
-                else if(providers.length) {
-                    this.selectedProvider = providers[0];
-                    // https://firebase.google.com/docs/auth/web/account-linking
-                }
-                else if(this.newAccount && this.password === this.password2) {
-                    this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
-                    .then((response) => {
-                        console.log(response);
-                        this.open = false;
+                        this.visible = false;
                     })
                     .catch((error) => {console.log(error)});
                 }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-        }
-        else {
-            this.$.auth.signInWithPopup()
-            .then((response) => {
-                console.log(response);
-                this.open = false;
-            })
-            .catch((error) => {console.log(error)});
-        }
+                else if (this.selectedProvider === 'email') {
+                    if(!this.$['email-input'].checkValidity()) return;
+                    this.$.auth.app.auth().fetchProvidersForEmail(this.email)
+                    .then((response) => {
+                        console.log(response)
+                        if(!response || !response.length){
+                            this.newAccount = true;
+                            console.log(this.newAccount)
+                            return;
+                        }
+                        else if(this.response.includes('password')) {
+                            this.newAccount = false;
+                            if(!this.$['password-input'].checkValidity()) return;
+                            this.$.auth.signInWithEmailAndPassword(this.email, this.password)
+                            .then((response) => {
+                                console.log(response);
+                                this.visible = false;
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                                //display: user and password don't match
+                            });
+                        }
+                        else if(providers.length) {
+                            this.selectedProvider = providers[0];
+                            // https://firebase.google.com/docs/auth/web/account-linking
+                        }
+                        else if(this.newAccount && this.password === this.password2) {
+                            this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+                            .then((response) => {
+                                console.log(response);
+                                this.visible = false;
+                            })
+                            .catch((error) => {console.log(error)});
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                }
+                else {
+                    this.$.auth.signInWithPopup()
+                    .then((response) => {
+                        console.log(response);
+                        this.visible = false;
+                    })
+                    .catch((error) => {console.log(error)});
+                }
 
-    },
-    sendPassword: function() {
-        //Complete this functionality
-        this.$.auth.sendPasswordResetEmail(this.email)
-        .then((response) => {
-            console.log(response);
-            // this.open = false;
-        })
-        .catch((error) => {
-            //say that the email doesn't exist
-            console.log(error)
-        });
-    },
-    signOut: function () {
-        this.$.auth.signOut();
-    },
-    handleError: function() {
-        console.log('login unsuccessful');
-    },
-    isSelected: function(provider, selectedProvider) {
-        return provider === selectedProvider;
-    },
-    selectProvider: function(e) {
-        this.selectedProvider = e.model.item;      
-    },
-    _selectedProviderChanged: function(newProvider, oldProvider) {
-        if(oldProvider) {
-            if(newProvider === 'email') {
-                //clear inputs and put newAccount to false
-                this.$$('#email-login').style.display = "flex";
-                this.$$('#email-login').animate(this.animationKeyframes, {duration: 300, easing: 'ease-in-out'});
             }
-            else {
-                let animationController = this.$$('#email-login').animate(this.animationKeyframes, {duration: 300, direction: 'reverse', easing: 'ease-in-out'});
-                animationController.onfinish = () => {this.$$('#email-login').style.display = "none";};
+            sendPassword() {
+                //Complete this functionality
+                this.$.auth.sendPasswordResetEmail(this.email)
+                .then((response) => {
+                    console.log(response);
+                    // this.visible = false;
+                })
+                .catch((error) => {
+                    //say that the email doesn't exist
+                    console.log(error)
+                });
+            }
+            signOut() {
+                this.$.auth.signOut();
+            }
+            handleError() {
+                console.log('login unsuccessful');
+            }
+            isSelected(provider, selectedProvider) {
+                return provider === selectedProvider;
+            }
+            selectProvider(e) {
+                this.selectedProvider = e.model.item;      
+            }
+            _selectedProviderChanged(newProvider, oldProvider) {
+                if(oldProvider) {
+                    if(newProvider === 'email') {
+                        this.emailLoginVisible = true;
+                    }
+                    else {
+                        this.emailLoginVisible = false;
+                    }
+                }
+            }
+            close() {
+                this.visible = false;
+            }
+            _signedInChanged(signedIn, old) {
+                console.log(signedIn)
+                if(signedIn) this.visible = false;
+                else this.visible = true;
             }
         }
-    },
-    close: function() {
-        this.open = false;
-    },
-    _signedInChanged: function(signedIn, old) {
-        console.log(signedIn)
-        if(signedIn) this.open = false;
-        else this.open = true;
-    },
-  });
-</script>
+        customElements.define(OneLogin.is, OneLogin);
+    </script>
 </dom-module>

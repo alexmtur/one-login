@@ -29,20 +29,20 @@
 </head>
 <body>
     <span>Open modal</span>
-    <!-- <dom-bind id="app"> -->
-        <template is="dom-bind">
+    <dom-bind id="app">
+        <template>
             <span>Open login</span>
-            <input type="checkbox" checked="{{open::change}}">
-            <one-login id="login" open="{{open}}" provider-list='["annonymous", "email", "facebook", "google", "twitter", "github"]'>
+            <input type="checkbox" checked="{{visible::change}}">
+            <one-login id="login" visible="{{visible}}" provider-list='["annonymous", "email", "facebook", "google", "twitter", "github"]'>
                 <div slot="header" style="display:flex; align-items:center; justify-content:center; padding-top:10px;flex-direction:column;">
                     <iron-icon icon="one-iconset:mindpost" style="width: 70px; height:auto;"></iron-icon>
                     <h3>mindpost</h3>
                 </div>
                 <!-- <div slot="footer">Forgot your password?</div> -->
             </one-login> 
-            <button on-click>Implement logout!</button>
+            <button on-click="">Implement logout!</button>
         </templavte>
-    <!-- </dom-bind> -->
+    </dom-bind>
 
 </body>
 </html>
